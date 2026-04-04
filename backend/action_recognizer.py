@@ -2,21 +2,25 @@ import numpy as np
 import time
 
 class ActionRecognizer:
+    # Initialize action recognizer with worker state tracking and idle thresholds
     def __init__(self):
         self.worker_states = {}
         # Adjust these based on your camera's frame rate
         self.idle_buffer_time = 10    # 10 seconds of no movement = Waiting
         self.idle_threshold_time = 30 # 30 seconds of no movement = Idle
 
+    # Calculate Euclidean distance between two points
     def calculate_distance(self, p1, p2):
         return np.linalg.norm(np.array(p1) - np.array(p2))
 
+    # Calculate angle between three points in degrees
     def calculate_angle(self, a, b, c):
         a, b, c = np.array(a), np.array(b), np.array(c)
         radians = np.arctan2(c[1]-b[1], c[0]-b[0]) - np.arctan2(a[1]-b[1], a[0]-b[0])
         angle = np.abs(radians * 180.0 / np.pi)
         return 360 - angle if angle > 180 else angle
 
+    # Determine worker action based on pose landmarks and movement patterns
     def determine_action(self, worker_id, pose_landmarks, current_position, frame_shape):
         
         current_time = time.time()

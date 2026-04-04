@@ -37,6 +37,7 @@ class KalmanFilter(object):
 
     """
 
+    # Initialize Kalman filter with motion and observation matrices
     def __init__(self):
         ndim, dt = 4, 1.
 
@@ -52,6 +53,7 @@ class KalmanFilter(object):
         self._std_weight_position = 1. / 20
         self._std_weight_velocity = 1. / 160
 
+    # Create track from unassociated measurement
     def initiate(self, measurement):
         """Create track from unassociated measurement.
 
@@ -85,6 +87,7 @@ class KalmanFilter(object):
         covariance = np.diag(np.square(std))
         return mean, covariance
 
+    # Run Kalman filter prediction step
     def predict(self, mean, covariance):
         """Run Kalman filter prediction step.
 
@@ -122,6 +125,7 @@ class KalmanFilter(object):
 
         return mean, covariance
 
+    # Project state distribution to measurement space
     def project(self, mean, covariance):
         """Project state distribution to measurement space.
 
@@ -151,6 +155,7 @@ class KalmanFilter(object):
             self._update_mat, covariance, self._update_mat.T))
         return mean, covariance + innovation_cov
 
+    # Run Kalman filter correction step
     def update(self, mean, covariance, measurement):
         """Run Kalman filter correction step.
 
@@ -185,6 +190,7 @@ class KalmanFilter(object):
             kalman_gain, projected_cov, kalman_gain.T))
         return new_mean, new_covariance
 
+    # Compute gating distance between state distribution and measurements
     def gating_distance(self, mean, covariance, measurements,
                         only_position=False):
         """Compute gating distance between state distribution and measurements.

@@ -11,6 +11,7 @@ db = client["coffee_shop"]
 # 3. Select the collection
 collection = db["activity_log"]
 
+# Update active/idle time for a specific person ID in the database
 def update_person_activity(person_id, status="active"):
     """
     Updates the active/idle time for a specific DeepSORT ID.
@@ -47,6 +48,8 @@ def update_person_activity(person_id, status="active"):
                 "$inc": {"total_active_seconds": duration}
             }
         )
+
+# Fetch all activity records and convert to JSON-friendly format
 def get_all_activity():
     """Fetches all records and converts them to a list of dicts"""
     # Fetch all records from the collection

@@ -4,6 +4,7 @@ import tensorflow.compat.v1 as tf  # Direct import of the compat layer
 tf.disable_v2_behavior()           # Explicitly turn off V2 featuress tf
 
 class ImageEncoder(object):
+    # Initialize image encoder with TensorFlow model
     def __init__(self, checkpoint_filename, input_name="images", output_name="features"):
         self.session = tf.Session() # Since we imported compat.v1 as tf
         with tf.gfile.GFile(checkpoint_filename, "rb") as f:
@@ -14,10 +15,12 @@ class ImageEncoder(object):
         self.input_var = self.session.graph.get_tensor_by_name(input_name + ":0")
         self.output_var = self.session.graph.get_tensor_by_name(output_name + ":0")
 
+    # Encode batch of images to feature vectors
     def __call__(self, data_batch):
         out = self.session.run(self.output_var, feed_dict={self.input_var: data_batch})
         return out
 
+# Create box encoder function for extracting features from image patches
 def create_box_encoder(model_filename, batch_size=32):
     image_encoder = ImageEncoder(model_filename)
 

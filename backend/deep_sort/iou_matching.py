@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 from . import linear_assignment
 
-
+# Compute intersection over union between bounding boxes
 def iou(bbox, candidates):
     """Computer intersection over union.
 
@@ -39,6 +39,7 @@ def iou(bbox, candidates):
     return area_intersection / (area_bbox + area_candidates - area_intersection)
 
 
+# Calculate cost matrix using IoU distance for track-detection matching
 def iou_cost(tracks, detections, track_indices=None,
              detection_indices=None):
     """An intersection over union distance metric.
