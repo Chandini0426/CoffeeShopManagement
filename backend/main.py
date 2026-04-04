@@ -41,6 +41,7 @@ mp_pose = mp.solutions.pose
 pose = mp_pose.Pose(static_image_mode=False, min_detection_confidence=0.5)
 mp_draw = mp.solutions.drawing_utils
 
+# Process video file with detection, tracking, and action recognition
 def process_video_task(input_path: str, output_path: str):
     """The heavy lifting function that processes the video file."""
     cap = cv2.VideoCapture(input_path)
@@ -101,6 +102,7 @@ def process_video_task(input_path: str, output_path: str):
     cap.release()
     out.release()
 
+# Handle video upload and start background processing task
 @app.post("/upload-video/")
 async def upload_video(file: UploadFile = File(...)):
     """Receives file from Frontend"""
@@ -115,6 +117,7 @@ async def upload_video(file: UploadFile = File(...)):
     
     return {"message": "Processing complete", "filename": f"processed_{file.filename}"}
 
+# Retrieve all worker activity statistics from database
 @app.get("/get-stats")
 async def get_stats():
     """Returns the worker activity data as JSON"""
@@ -124,7 +127,7 @@ async def get_stats():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-# Get stats for a specific worker
+# Retrieve activity statistics for a specific worker by ID
 @app.get("/get-stats/{worker_id}")
 async def get_worker_stats(worker_id: int):
     worker = collection.find_one({"person_id": worker_id})

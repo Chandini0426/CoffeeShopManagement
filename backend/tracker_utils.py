@@ -9,6 +9,7 @@ class Tracker:
     encoder = None
     tracks = None
 
+    # Initialize the tracker with Deep SORT and encoder model
     def __init__(self):
         max_cosine_distance = 0.4
         nn_budget = None
@@ -19,6 +20,7 @@ class Tracker:
         self.tracker = DeepSortTracker(metric)
         self.encoder = gdet.create_box_encoder(encoder_model_filename, batch_size=1)
 
+    # Update tracker with frame and detections, predict and update tracks
     def update(self, frame, detections):
 
         if len(detections) == 0:
@@ -41,6 +43,7 @@ class Tracker:
         self.tracker.update(dets)
         self.update_tracks()
 
+    # Update confirmed tracks from tracker and filter out unconfirmed or stale tracks
     def update_tracks(self):
         tracks = []
         for track in self.tracker.tracks:
@@ -59,6 +62,7 @@ class Track:
     track_id = None
     bbox = None
 
+    # Initialize a Track object with track ID and bounding box coordinates
     def __init__(self, id, bbox):
         self.track_id = id
         self.bbox = bbox

@@ -1,4 +1,3 @@
-
 # vim: expandtab:ts=4:sw=4
 from __future__ import absolute_import
 import numpy as np
@@ -6,7 +5,6 @@ from . import kalman_filter
 from . import linear_assignment
 from . import iou_matching
 from .track import Track
-
 
 class Tracker:
     """
@@ -38,6 +36,7 @@ class Tracker:
 
     """
 
+    # Initialize multi-target tracker with distance metric and tracking parameters
     def __init__(self, metric, max_iou_distance=0.7, max_age=30, n_init=3):
         self.metric = metric
         self.max_iou_distance = max_iou_distance
@@ -48,6 +47,7 @@ class Tracker:
         self.tracks = []
         self._next_id = 1
 
+    # Propagate track state distributions one time step forward
     def predict(self):
         """Propagate track state distributions one time step forward.
 
@@ -56,6 +56,7 @@ class Tracker:
         for track in self.tracks:
             track.predict(self.kf)
 
+    # Perform measurement update and track management
     def update(self, detections):
         """Perform measurement update and track management.
 
@@ -91,6 +92,7 @@ class Tracker:
         self.metric.partial_fit(
             np.asarray(features), np.asarray(targets), active_targets)
 
+    # Match tracks to detections using appearance and IoU-based matching
     def _match(self, detections):
 
         def gated_metric(tracks, dets, track_indices, detection_indices):
@@ -131,6 +133,7 @@ class Tracker:
         unmatched_tracks = list(set(unmatched_tracks_a + unmatched_tracks_b))
         return matches, unmatched_tracks, unmatched_detections
 
+    # Initiate a new track from an unmatched detection
     def _initiate_track(self, detection):
         mean, covariance = self.kf.initiate(detection.to_xyah())
         self.tracks.append(Track(

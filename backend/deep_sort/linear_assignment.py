@@ -4,10 +4,9 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from . import kalman_filter
 
-
 INFTY_COST = 1e+5
 
-
+# Solve linear assignment problem for track-detection matching
 def min_cost_matching(
         distance_metric, max_distance, tracks, detections, track_indices=None,
         detection_indices=None):
@@ -75,6 +74,7 @@ def min_cost_matching(
     return matches, unmatched_tracks, unmatched_detections
 
 
+# Run matching cascade for multi-level track association
 def matching_cascade(
         distance_metric, max_distance, cascade_depth, tracks, detections,
         track_indices=None, detection_indices=None):
@@ -141,6 +141,7 @@ def matching_cascade(
     return matches, unmatched_tracks, unmatched_detections
 
 
+# Invalidate infeasible entries in cost matrix using Kalman filter gating
 def gate_cost_matrix(
         kf, cost_matrix, tracks, detections, track_indices, detection_indices,
         gated_cost=INFTY_COST, only_position=False):
