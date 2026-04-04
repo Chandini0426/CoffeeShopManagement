@@ -1,7 +1,7 @@
 # vim: expandtab:ts=4:sw=4
 import numpy as np
 
-
+# Compute pair-wise squared distance between points in a and b
 def _pdist(a, b):
     """Compute pair-wise squared distance between points in `a` and `b`.
 
@@ -28,6 +28,7 @@ def _pdist(a, b):
     return r2
 
 
+# Compute pair-wise cosine distance between points in a and b
 def _cosine_distance(a, b, data_is_normalized=False):
     """Compute pair-wise cosine distance between points in `a` and `b`.
 
@@ -54,6 +55,7 @@ def _cosine_distance(a, b, data_is_normalized=False):
     return 1. - np.dot(a, b.T)
 
 
+# Helper function for nearest neighbor distance metric using Euclidean distance
 def _nn_euclidean_distance(x, y):
     """ Helper function for nearest neighbor distance metric (Euclidean).
 
@@ -75,6 +77,7 @@ def _nn_euclidean_distance(x, y):
     return np.maximum(0.0, distances.min(axis=0))
 
 
+# Helper function for nearest neighbor distance metric using cosine distance
 def _nn_cosine_distance(x, y):
     """ Helper function for nearest neighbor distance metric (cosine).
 
@@ -120,6 +123,7 @@ class NearestNeighborDistanceMetric(object):
 
     """
 
+    # Initialize nearest neighbor distance metric with specified parameters
     def __init__(self, metric, matching_threshold, budget=None):
 
 
@@ -134,6 +138,7 @@ class NearestNeighborDistanceMetric(object):
         self.budget = budget
         self.samples = {}
 
+    # Update the distance metric with new feature data
     def partial_fit(self, features, targets, active_targets):
         """Update the distance metric with new data.
 
@@ -153,6 +158,7 @@ class NearestNeighborDistanceMetric(object):
                 self.samples[target] = self.samples[target][-self.budget:]
         self.samples = {k: self.samples[k] for k in active_targets}
 
+    # Compute distance between features and targets using stored samples
     def distance(self, features, targets):
         """Compute distance between features and targets.
 
