@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Worker Activity Monitor</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f6f8;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+            border: none;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #stats {
+            margin-top: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Upload Video</h2>
+
+    <input type="file" id="videoFile">
+    <br>
+    <button onclick="uploadVideo()">Upload</button>
+
+    <p id="uploadStatus"></p>
+
+    <hr>
+
+    <h3>Worker Stats</h3>
+    <button onclick="getStats()">Fetch Stats</button>
+
+    <div id="stats"></div>
+
+    <div id="videoContainer"></div>
+</div>
+
+<script>
+const BASE_URL = "http://127.0.0.1:8000";
+
+let currentFile = "";
+
+// Upload
+async function uploadVideo() {
+    const fileInput = document.getElementById("videoFile");
+    const status = document.getElementById("uploadStatus");
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    const res = await fetch(`${BASE_URL}/upload-video/`, {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await res.json();
+
+    currentFile = data.filename; // ✅ IMPORTANT
+
+    trackProgress();
+}
+
+// Track progress
+function trackProgress() {
+    const status = document.getElementById("uploadStatus");
+
+    const interval = setInterval(async () => {
+        const res = await fetch(`${BASE_URL}/video-status/${currentFile}`);
+        const data = await res.json();
+
+        if (data.status === "completed") {
+            clearInterval(interval);
+            status.innerText = "✅ Completed";
+
+            setTimeout(showVideo, 1000);
+            return;
+        }
+
+        status.innerText = `⏳ ${data.progress.toFixed(2)}%`;
+    }, 2000);
+}
+
+// Show video
+function showVideo() {
+    const videoDiv = document.getElementById("videoContainer");
+
+    // ✅ safer way
+    const nameWithoutExt = currentFile.substring(0, currentFile.lastIndexOf("."));
+
+    const videoURL = `${BASE_URL}/video/processed_${nameWithoutExt}.mp4`;
+
+    console.log("VIDEO URL:", videoURL); // DEBUG
+
+    videoDiv.innerHTML = `
+        <video width="400" controls autoplay>
+            <source src="${videoURL}" type="video/mp4">
+        </video>
+    `;
+}
+
+// Stats
+async function getStats() {
+    const res = await fetch(`${BASE_URL}/dashboard/`);
+    const data = await res.json();
+
+    const statsDiv = document.getElementById("stats");
+
+    let html = "";
+
+    data.forEach(worker => {
+        html += `
+            <p>
+                ID: ${worker.person_id}<br>
+                Active: ${(worker.active_seconds || 0).toFixed(2)} s<br>
+                Idle: ${(worker.idle_seconds || 0).toFixed(2)} s
+            </p>
+            <hr>
+        `;
+    });
+
+    statsDiv.innerHTML = html;
+}
+</script>
+
+</body>
+</html>

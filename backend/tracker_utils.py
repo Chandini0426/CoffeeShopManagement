@@ -1,68 +1,32 @@
+import supervision as sv
 import numpy as np
-from deep_sort import nn_matching
-from deep_sort.tracker import Tracker as DeepSortTracker
-from deep_sort.detection import Detection
-from deep_sort import gdet
 
-class Tracker:
-    tracker = None
-    encoder = None
-    tracks = None
-
-    # Initialize the tracker with Deep SORT and encoder model
+class TrackerUtil:
     def __init__(self):
-        max_cosine_distance = 0.4
-        nn_budget = None
+        self.tracker = sv.ByteTrack()
 
-        encoder_model_filename = 'model_data/mars-small128.pb'
-
-        metric = nn_matching.NearestNeighborDistanceMetric("cosine", max_cosine_distance, nn_budget)
-        self.tracker = DeepSortTracker(metric)
-        self.encoder = gdet.create_box_encoder(encoder_model_filename, batch_size=1)
-
-    # Update tracker with frame and detections, predict and update tracks
-    def update(self, frame, detections):
+    def update(self, detections):
+        """
+        detections: list [x1,y1,x2,y2,conf,cls]
+        """
 
         if len(detections) == 0:
-            self.tracker.predict()
-            self.tracker.update([])  
-            self.update_tracks()
-            return
+            return []
 
-        bboxes = np.asarray([d[:-1] for d in detections])
-        bboxes[:, 2:] = bboxes[:, 2:] - bboxes[:, 0:2]
-        scores = [d[-1] for d in detections]
+        det_array = np.array(detections)
 
-        features = self.encoder(frame, bboxes)
+        # supervision expects:
+        # xyxy, confidence, class_id
+        xyxy = det_array[:, :4]
+        confidence = det_array[:, 4]
+        class_id = det_array[:, 5]
 
-        dets = []
-        for bbox_id, bbox in enumerate(bboxes):
-            dets.append(Detection(bbox, scores[bbox_id], features[bbox_id]))
+        sv_detections = sv.Detections(
+            xyxy=xyxy,
+            confidence=confidence,
+            class_id=class_id
+        )
 
-        self.tracker.predict()
-        self.tracker.update(dets)
-        self.update_tracks()
+        tracked = self.tracker.update_with_detections(sv_detections)
 
-    # Update confirmed tracks from tracker and filter out unconfirmed or stale tracks
-    def update_tracks(self):
-        tracks = []
-        for track in self.tracker.tracks:
-            if not track.is_confirmed() or track.time_since_update > 1:
-                continue
-            bbox = track.to_tlbr()
-
-            id = track.track_id
-
-            tracks.append(Track(id, bbox))
-
-        self.tracks = tracks
-
-
-class Track:
-    track_id = None
-    bbox = None
-
-    # Initialize a Track object with track ID and bounding box coordinates
-    def __init__(self, id, bbox):
-        self.track_id = id
-        self.bbox = bbox
+        return tracked
