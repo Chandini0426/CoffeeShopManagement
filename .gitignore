@@ -1,16 +1,29 @@
+# Virtual Environment
 rtrp/
-backend/results/
-backend/uploads/
-backend/yolov8n.pt
+venv/
+
+# Python cache
 __pycache__/
 *.pyc
+
+# OS files
 .DS_Store
+
+# Backend generated files
+backend/results/
+backend/uploads/
 
 # Videos
 *.mp4
 *.avi
+*.mov
+*.zip
 
 # Models / large files
 *.pt
 *.pkl
 *.h5
+
+# Logs / temp
+*.log
+*.tmp
